@@ -2,7 +2,6 @@ import * as moment from "moment";
 
 import * as utils from "./utils";
 
-import ITokenHandler from "./token/ITokenHandler";
 import YearTokenHandler from "./token/YearTokenHandler";
 import MonthTokenHandler from "./token/MonthTokenHandler";
 import DayTokenHandler from "./token/DayTokenHandler";
@@ -13,22 +12,10 @@ import SeparatorTokenHandler from "./token/SeparatorTokenHandler";
 import InputState from "./state/InputState";
 import MomentInputState from "./state/MomentInputState";
 
-class MaskToken {
-  constructor(public token:string, public handler:ITokenHandler) {
-  }
-}
-
-class MaskTokenizer {
-  constructor(private mask:string, tokens:MaskToken[]) {
-  }
-}
-
 export default class Masketter {
   private data:string;
   private value:string;
   private inputState:InputState;
-  private tokenHandlers:ITokenHandler[];
-  private tokenIndex:number;
 
   constructor(private input:HTMLInputElement, private mask:string) {
     this.input.classList.add("masketter");
@@ -38,6 +25,10 @@ export default class Masketter {
     let keyDownEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {
         console.log(event.type, this.data, event.key, event.code);
+        if (this.inputState.onKeyDown(event.key)) {
+          input.value = this.inputState.value;
+          event.preventDefault();
+        }
       }
     };
 
@@ -45,27 +36,39 @@ export default class Masketter {
       handleEvent: (event:KeyboardEvent) => {
         console.log(event.type, this.data, event.key, event.code);
         if (this.inputState.onKeyPress(event.key)) {
+          input.value = this.inputState.value;
           event.preventDefault();
         }
-        input.value = this.inputState.value;
       }
     };
 
     let keyUpEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {
         console.log(event.type, this.data, event.key, event.code);
+        if (this.inputState.onKeyUp(event.key)) {
+          input.value = this.inputState.value;
+          event.preventDefault();
+        }
       }
     };
 
     let focusEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
         console.log(event.type, this.data);
+        if (this.inputState.onFocus()) {
+          input.value = this.inputState.value;
+          event.preventDefault();
+        }
       }
     };
 
     let blurEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
         console.log(event.type, this.data);
+        if (this.inputState.onBlur()) {
+          input.value = this.inputState.value;
+          event.preventDefault();
+        }
       }
     };
 

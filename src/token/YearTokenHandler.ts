@@ -1,18 +1,10 @@
 import { Moment, utc } from "moment";
 import * as moment from "moment";
 
-import IMomentTokenHandler from "./IMomentTokenHandler";
+import MomentTokenHandler from "./MomentTokenHandler";
 import InvalidInputError from "../errors/InvalidInputError";
 
-export default class YearTokenHandler implements IMomentTokenHandler {
-  isCompleted: boolean;
-  value: string;
-
-  constructor(private format:string, public moment:Moment) {
-    this.value = "";
-    this.isCompleted = false;
-  }
-
+export default class YearTokenHandler extends MomentTokenHandler {
   handleInput(input: string): void {
     let n:number = Number(input);
     if (n === Number.NaN) {

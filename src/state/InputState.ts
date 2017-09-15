@@ -1,9 +1,10 @@
-import IToken from "../token/IToken";
-
 export default class InputState {
   protected _value : string;
+  protected _oldValue : string;
 
-  constructor(protected mask:string) {
+  constructor(protected mask : string) {
+    this._value = "";
+    this._oldValue = "";
   }
 
   public get value(): string {
@@ -11,10 +12,12 @@ export default class InputState {
   }
 
   public onFocus():boolean {
+    this._oldValue = this._value;
     return true;
   }
 
   public onBlur():boolean {
+    this._value = this._oldValue;
     return true;
   }
 

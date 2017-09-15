@@ -1,25 +1,19 @@
 import { Moment, utc } from "moment";
 
-import IMomentTokenHandler from "./IMomentTokenHandler";
+import MomentTokenHandler from "./MomentTokenHandler";
 import InvalidInputError from "../errors/InvalidInputError";
 
-export default class HourTokenHandler implements IMomentTokenHandler {
-  isCompleted: boolean;
-  value: string;
+export default class HourTokenHandler extends MomentTokenHandler {
   is24format: boolean;
 
-  constructor(private format:string, public moment:Moment) {
-    this.value = "";
-    this.isCompleted = false;
+  constructor(format:string, moment:Moment) {
+    super(format, moment);
     this.is24format = this.format[0] === "H";
   }
 
   handleInput(input: string): void {
-    let hour:number = this.moment.hour();
+    let hour:number = this.value === "" ? 0 : Number(this.value);
     let n:number = Number(input);
-    if (n === Number.NaN) {
-      throw new InvalidInputError();
-    }
 
     if (this.value === "") {
       this.moment.hour(n);

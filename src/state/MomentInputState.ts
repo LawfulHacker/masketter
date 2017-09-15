@@ -1,7 +1,9 @@
 import { Moment } from "moment";
 import * as moment from "moment";
 
-import ITokenHandler from "../token/ITokenHandler";
+import InvalidInputError from "../errors/InvalidInputError";
+
+import TokenHandler from "../token/TokenHandler";
 import YearTokenHandler from "../token/YearTokenHandler";
 import MonthTokenHandler from "../token/MonthTokenHandler";
 import DayTokenHandler from "../token/DayTokenHandler";
@@ -14,7 +16,7 @@ import InputState from "./InputState";
 
 export default class MomentInputState extends InputState {
   protected _moment:Moment;
-  private tokenHandlers:ITokenHandler[];
+  private tokenHandlers:TokenHandler[];
   private tokenIndex:number;
 
   constructor(mask:string) {
@@ -29,8 +31,36 @@ export default class MomentInputState extends InputState {
     return this._moment;
   }
 
+  public onBlur():boolean {
+    if (this._value !== moment(this._value, this.mask).format(this.mask)) {
+      this._value = this._oldValue;
+    }
+    return true;
+  }
+
+  public onKeyDown(key:string):boolean {
+    let handler:TokenHandler = this.tokenHandlers[this.tokenIndex];
+
+    if (key === "Backspace") {
+      do {
+        try {
+          handler.handleBackspace();
+          break;
+        } catch (e) {
+          handler = this.tokenHandlers[--this.tokenIndex];
+        }
+      } while (true);
+
+      this.refreshValue();
+
+      return true;
+    }
+
+    return false;
+  }
+
   public onKeyPress(key:string):boolean {
-    let handler:ITokenHandler = this.tokenHandlers[this.tokenIndex];
+    let handler:TokenHandler = this.tokenHandlers[this.tokenIndex];
 
     if (/[0-9APM\\: ]/i.test(key)) {
       handler.handleInput(key);
@@ -39,6 +69,12 @@ export default class MomentInputState extends InputState {
       }
     }
 
+    this.refreshValue();
+
+    return true;
+  }
+
+  protected refreshValue():void {
     let inputValue:string = "";
 
     for (let h of this.tokenHandlers) {
@@ -47,8 +83,8 @@ export default class MomentInputState extends InputState {
         break;
       }
     }
+
     this._value = inputValue;
-    return true;
   }
 
   protected parseMask():void {

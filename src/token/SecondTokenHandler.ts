@@ -1,17 +1,9 @@
 import { Moment, utc } from "moment";
 
-import IMomentTokenHandler from "./IMomentTokenHandler";
+import MomentTokenHandler from "./MomentTokenHandler";
 import InvalidInputError from "../errors/InvalidInputError";
 
-export default class SecondTokenHandler implements IMomentTokenHandler {
-  isCompleted: boolean;
-  value: string;
-
-  constructor(private format:string, public moment:Moment) {
-    this.value = "";
-    this.isCompleted = false;
-  }
-
+export default class SecondTokenHandler extends MomentTokenHandler {
   handleInput(input: string): void {
     let second:number = this.moment.second();
     let n:number = Number(input);

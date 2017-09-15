@@ -1,17 +1,9 @@
 import { Moment, utc } from "moment";
 
-import IMomentTokenHandler from "./IMomentTokenHandler";
+import MomentTokenHandler from "./MomentTokenHandler";
 import InvalidInputError from "../errors/InvalidInputError";
 
-export default class DayTokenHandler implements IMomentTokenHandler {
-  isCompleted: boolean;
-  value: string;
-
-  constructor(private format:string, public moment:Moment) {
-    this.value = "";
-    this.isCompleted = false;
-  }
-
+export default class DayTokenHandler extends MomentTokenHandler {
   handleInput(input: string): void {
     let day:number = this.value === "" ? 0 : Number(this.value);
     let n:number = Number(input);
