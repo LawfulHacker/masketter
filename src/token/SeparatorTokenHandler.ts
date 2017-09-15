@@ -17,4 +17,8 @@ export default class SeparatorTokenHandler extends TokenHandler {
   handleInput(input: string): void {
     throw new InvalidInputError();
   }
+
+  reset():void {
+    // do nothing
+  }
 }

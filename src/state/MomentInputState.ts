@@ -38,6 +38,15 @@ export default class MomentInputState extends InputState {
     return true;
   }
 
+  public onFocus():boolean {
+    this.tokenIndex = 0;
+    this._oldValue = this._value;
+    for (let h of this.tokenHandlers) {
+      h.reset();
+    }
+    return true;
+  }
+
   public onKeyDown(key:string):boolean {
     let handler:TokenHandler = this.tokenHandlers[this.tokenIndex];
 

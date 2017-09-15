@@ -10,7 +10,13 @@ export default class TokenHandler {
   handleBackspace():void {
     // implemented by child classes
   }
+
   handleInput(input:string):void {
     // implemented by child classes
+  }
+
+  reset():void {
+    this.value = "";
+    this.isCompleted = false;
   }
 }
