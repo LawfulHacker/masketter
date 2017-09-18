@@ -2,13 +2,17 @@ export default class InputState {
   protected _value : string;
   protected _oldValue : string;
 
-  constructor(protected mask : string) {
-    this._value = "";
+  constructor(protected mask : string, value:string) {
+    this._value = value;
     this._oldValue = "";
   }
 
   public get value(): string {
     return this._value;
+  }
+
+  public set value(value:string) {
+    this._value = value;
   }
 
   public onFocus():boolean {

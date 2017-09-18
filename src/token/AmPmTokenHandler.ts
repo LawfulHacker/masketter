@@ -1,9 +1,9 @@
 import { Moment, utc } from "moment";
 
-import TokenHandler from "./TokenHandler";
+import MomentTokenHandler from "./MomentTokenHandler";
 import InvalidInputError from "../errors/InvalidInputError";
 
-export default class AmPmTokenHandler extends TokenHandler {
+export default class AmPmTokenHandler extends MomentTokenHandler {
   handleInput(input: string): void {
     if (input.toUpperCase() === "A" || input.toUpperCase() === "P") {
       this.isCompleted = true;

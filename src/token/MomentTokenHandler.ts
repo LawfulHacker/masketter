@@ -6,6 +6,10 @@ import TokenHandler from "./TokenHandler";
 export default class MomentTokenHandler extends TokenHandler {
   constructor(protected format:string, public moment:Moment) {
     super();
+    if (moment.isValid()) {
+      this.value = this.moment.format(this.format);
+      this.isCompleted = true;
+    }
   }
 
   handleBackspace(): void {

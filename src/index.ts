@@ -19,7 +19,7 @@ export default class Masketter {
 
   constructor(private input:HTMLInputElement, private mask:string) {
     this.input.classList.add("masketter");
-    this.inputState = new MomentInputState(this.mask);
+    this.inputState = new MomentInputState(this.mask, input.value);
 
     let keyDownEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {

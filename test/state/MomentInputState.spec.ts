@@ -4,7 +4,7 @@ import MomentInputState from "../../src/state/MomentInputState";
 
 describe("MomentInputState", () => {
   it("should handle H:mm:ss mask correctly", () => {
-    let inputState:MomentInputState = new MomentInputState("H:mm:ss");
+    let inputState:MomentInputState = new MomentInputState("H:mm:ss", "");
 
     inputState.onKeyPress("0");
     expect(inputState.value).to.be.equal("0");
@@ -30,7 +30,7 @@ describe("MomentInputState", () => {
   });
 
   it("should handle HH:mm:ss mask correctly", () => {
-    let inputState:MomentInputState = new MomentInputState("HH:mm:ss");
+    let inputState:MomentInputState = new MomentInputState("HH:mm:ss", "");
 
     inputState.onKeyPress("0");
     expect(inputState.value).to.be.equal("0");
@@ -56,7 +56,7 @@ describe("MomentInputState", () => {
   });
 
   it("should handle h:mm:ss mask correctly", () => {
-    let inputState:MomentInputState = new MomentInputState("h:mm:ss");
+    let inputState:MomentInputState = new MomentInputState("h:mm:ss", "");
 
     inputState.onKeyPress("0");
     expect(inputState.value).to.be.equal("0");

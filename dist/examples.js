@@ -7,7 +7,7 @@
 		exports["examples"] = factory(require("moment"));
 	else
 		root["examples"] = factory(root["moment"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_3__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -90,14 +90,30 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var InvalidInputError = /** @class */ (function (_super) {
-    __extends(InvalidInputError, _super);
-    function InvalidInputError() {
-        return _super.call(this, "Invalid Input") || this;
+var InvalidInputError_1 = __webpack_require__(1);
+var TokenHandler_1 = __webpack_require__(3);
+var MomentTokenHandler = /** @class */ (function (_super) {
+    __extends(MomentTokenHandler, _super);
+    function MomentTokenHandler(format, moment) {
+        var _this = _super.call(this) || this;
+        _this.format = format;
+        _this.moment = moment;
+        if (moment.isValid()) {
+            _this.value = _this.moment.format(_this.format);
+            _this.isCompleted = true;
+        }
+        return _this;
     }
-    return InvalidInputError;
-}(Error));
-exports.default = InvalidInputError;
+    MomentTokenHandler.prototype.handleBackspace = function () {
+        this.isCompleted = false;
+        if (this.value === "") {
+            throw new InvalidInputError_1.default();
+        }
+        this.value = this.value.substr(0, this.value.length - 1);
+    };
+    return MomentTokenHandler;
+}(TokenHandler_1.default));
+exports.default = MomentTokenHandler;
 
 
 /***/ }),
@@ -117,30 +133,24 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var InvalidInputError_1 = __webpack_require__(0);
-var TokenHandler_1 = __webpack_require__(2);
-var MomentTokenHandler = /** @class */ (function (_super) {
-    __extends(MomentTokenHandler, _super);
-    function MomentTokenHandler(format, moment) {
-        var _this = _super.call(this) || this;
-        _this.format = format;
-        _this.moment = moment;
-        return _this;
+var InvalidInputError = /** @class */ (function (_super) {
+    __extends(InvalidInputError, _super);
+    function InvalidInputError() {
+        return _super.call(this, "Invalid Input") || this;
     }
-    MomentTokenHandler.prototype.handleBackspace = function () {
-        this.isCompleted = false;
-        if (this.value === "") {
-            throw new InvalidInputError_1.default();
-        }
-        this.value = this.value.substr(0, this.value.length - 1);
-    };
-    return MomentTokenHandler;
-}(TokenHandler_1.default));
-exports.default = MomentTokenHandler;
+    return InvalidInputError;
+}(Error));
+exports.default = InvalidInputError;
 
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("moment");
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -165,12 +175,6 @@ var TokenHandler = /** @class */ (function () {
 }());
 exports.default = TokenHandler;
 
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("moment");
 
 /***/ }),
 /* 4 */
@@ -223,7 +227,7 @@ var Masketter = /** @class */ (function () {
         this.input = input;
         this.mask = mask;
         this.input.classList.add("masketter");
-        this.inputState = new MomentInputState_1.default(this.mask);
+        this.inputState = new MomentInputState_1.default(this.mask, input.value);
         var keyDownEventListener = {
             handleEvent: function (event) {
                 if (_this.inputState.onKeyDown(event.key)) {
@@ -306,7 +310,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var moment = __webpack_require__(3);
+var moment = __webpack_require__(2);
 var YearTokenHandler_1 = __webpack_require__(7);
 var MonthTokenHandler_1 = __webpack_require__(8);
 var DayTokenHandler_1 = __webpack_require__(9);
@@ -318,12 +322,14 @@ var SeparatorTokenHandler_1 = __webpack_require__(14);
 var InputState_1 = __webpack_require__(15);
 var MomentInputState = /** @class */ (function (_super) {
     __extends(MomentInputState, _super);
-    function MomentInputState(mask) {
-        var _this = _super.call(this, mask) || this;
-        _this._moment = moment();
+    function MomentInputState(mask, value) {
+        var _this = _super.call(this, mask, value) || this;
+        _this._moment = moment(value, mask);
         _this.tokenHandlers = [];
         _this.tokenIndex = 0;
         _this.parseMask();
+        _this.refreshValue();
+        console.log(_this.tokenIndex);
         return _this;
     }
     Object.defineProperty(MomentInputState.prototype, "moment", {
@@ -340,12 +346,7 @@ var MomentInputState = /** @class */ (function (_super) {
         return true;
     };
     MomentInputState.prototype.onFocus = function () {
-        this.tokenIndex = 0;
         this._oldValue = this._value;
-        for (var _i = 0, _a = this.tokenHandlers; _i < _a.length; _i++) {
-            var h = _a[_i];
-            h.reset();
-        }
         return true;
     };
     MomentInputState.prototype.onKeyDown = function (key) {
@@ -358,6 +359,10 @@ var MomentInputState = /** @class */ (function (_super) {
                 }
                 catch (e) {
                     handler = this.tokenHandlers[--this.tokenIndex];
+                    if (this.tokenIndex < 0) {
+                        this.tokenIndex = 0;
+                        break;
+                    }
                 }
             } while (true);
             this.refreshValue();
@@ -366,11 +371,17 @@ var MomentInputState = /** @class */ (function (_super) {
         return false;
     };
     MomentInputState.prototype.onKeyPress = function (key) {
-        var handler = this.tokenHandlers[this.tokenIndex];
+        var handler;
         if (/[0-9APM\\: ]/i.test(key)) {
-            handler.handleInput(key);
-            while (handler.isCompleted && ++this.tokenIndex < this.tokenHandlers.length) {
+            do {
                 handler = this.tokenHandlers[this.tokenIndex];
+                if (!handler.isCompleted) {
+                    handler.handleInput(key);
+                    break;
+                }
+            } while (handler.isCompleted && ++this.tokenIndex < this.tokenHandlers.length);
+            if (this.tokenIndex >= this.tokenHandlers.length) {
+                this.tokenIndex = this.tokenHandlers.length - 1;
             }
         }
         this.refreshValue();
@@ -388,7 +399,7 @@ var MomentInputState = /** @class */ (function (_super) {
         this._value = inputValue;
     };
     MomentInputState.prototype.parseMask = function () {
-        var exp = /(YY|YYYY|MM?|DD?|HH?|hh?|mm|ss|A|.)/g;
+        var exp = /(YYYY|YY|MM?|DD?|HH?|hh?|mm|ss|A|.)/g;
         var match;
         while (true) {
             match = exp.exec(this.mask);
@@ -424,11 +435,14 @@ var MomentInputState = /** @class */ (function (_super) {
                     break;
                 case "a":
                 case "A":
-                    this.tokenHandlers.push(new AmPmTokenHandler_1.default());
+                    this.tokenHandlers.push(new AmPmTokenHandler_1.default(match[0], this._moment));
                     break;
                 default:
                     this.tokenHandlers.push(new SeparatorTokenHandler_1.default(match[0]));
                     break;
+            }
+            if (this._moment.isValid()) {
+                this.tokenIndex++;
             }
         }
     };
@@ -454,9 +468,9 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var moment = __webpack_require__(3);
-var MomentTokenHandler_1 = __webpack_require__(1);
-var InvalidInputError_1 = __webpack_require__(0);
+var moment = __webpack_require__(2);
+var MomentTokenHandler_1 = __webpack_require__(0);
+var InvalidInputError_1 = __webpack_require__(1);
 var YearTokenHandler = /** @class */ (function (_super) {
     __extends(YearTokenHandler, _super);
     function YearTokenHandler() {
@@ -496,8 +510,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var MomentTokenHandler_1 = __webpack_require__(1);
-var InvalidInputError_1 = __webpack_require__(0);
+var MomentTokenHandler_1 = __webpack_require__(0);
+var InvalidInputError_1 = __webpack_require__(1);
 var MonthTokenHandler = /** @class */ (function (_super) {
     __extends(MonthTokenHandler, _super);
     function MonthTokenHandler() {
@@ -548,8 +562,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var MomentTokenHandler_1 = __webpack_require__(1);
-var InvalidInputError_1 = __webpack_require__(0);
+var MomentTokenHandler_1 = __webpack_require__(0);
+var InvalidInputError_1 = __webpack_require__(1);
 var DayTokenHandler = /** @class */ (function (_super) {
     __extends(DayTokenHandler, _super);
     function DayTokenHandler() {
@@ -600,7 +614,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var MomentTokenHandler_1 = __webpack_require__(1);
+var MomentTokenHandler_1 = __webpack_require__(0);
 var HourTokenHandler = /** @class */ (function (_super) {
     __extends(HourTokenHandler, _super);
     function HourTokenHandler(format, moment) {
@@ -650,8 +664,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var MomentTokenHandler_1 = __webpack_require__(1);
-var InvalidInputError_1 = __webpack_require__(0);
+var MomentTokenHandler_1 = __webpack_require__(0);
+var InvalidInputError_1 = __webpack_require__(1);
 var MinuteTokenHandler = /** @class */ (function (_super) {
     __extends(MinuteTokenHandler, _super);
     function MinuteTokenHandler() {
@@ -702,8 +716,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var MomentTokenHandler_1 = __webpack_require__(1);
-var InvalidInputError_1 = __webpack_require__(0);
+var MomentTokenHandler_1 = __webpack_require__(0);
+var InvalidInputError_1 = __webpack_require__(1);
 var SecondTokenHandler = /** @class */ (function (_super) {
     __extends(SecondTokenHandler, _super);
     function SecondTokenHandler() {
@@ -754,7 +768,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TokenHandler_1 = __webpack_require__(2);
+var MomentTokenHandler_1 = __webpack_require__(0);
 var AmPmTokenHandler = /** @class */ (function (_super) {
     __extends(AmPmTokenHandler, _super);
     function AmPmTokenHandler() {
@@ -767,7 +781,7 @@ var AmPmTokenHandler = /** @class */ (function (_super) {
         }
     };
     return AmPmTokenHandler;
-}(TokenHandler_1.default));
+}(MomentTokenHandler_1.default));
 exports.default = AmPmTokenHandler;
 
 
@@ -788,8 +802,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TokenHandler_1 = __webpack_require__(2);
-var InvalidInputError_1 = __webpack_require__(0);
+var TokenHandler_1 = __webpack_require__(3);
+var InvalidInputError_1 = __webpack_require__(1);
 var SeparatorTokenHandler = /** @class */ (function (_super) {
     __extends(SeparatorTokenHandler, _super);
     function SeparatorTokenHandler(format) {
@@ -820,14 +834,17 @@ exports.default = SeparatorTokenHandler;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var InputState = /** @class */ (function () {
-    function InputState(mask) {
+    function InputState(mask, value) {
         this.mask = mask;
-        this._value = "";
+        this._value = value;
         this._oldValue = "";
     }
     Object.defineProperty(InputState.prototype, "value", {
         get: function () {
             return this._value;
+        },
+        set: function (value) {
+            this._value = value;
         },
         enumerable: true,
         configurable: true
@@ -863,10 +880,12 @@ exports.default = InputState;
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = __webpack_require__(5);
 var utils = __webpack_require__(4);
-function addInput(mask, placeholder) {
+function addInput(mask, placeholder, initialValue) {
+    if (initialValue === void 0) { initialValue = ""; }
     var input = utils.create(null, "input", {
         type: "text",
-        placeholder: placeholder
+        placeholder: placeholder,
+        value: initialValue
     });
     var mask1 = new index_1.default(input, mask);
     document.body.appendChild(input);
@@ -879,8 +898,16 @@ addInput("hh:mm:ss A", "00:00:00 AM");
 addInput("h:mm:ss A", "0:00:00 AM");
 addInput("DD/MM/YYYY", "DD/MM/YYYY");
 addInput("DD/MM/YY", "DD/MM/YY");
-addInput("MM/DD/YY", "MM/DD/YY");
 addInput("MM/DD/YYYY", "MM/DD/YYYY");
+addInput("MM/DD/YY", "MM/DD/YY");
+addInput("HH:mm:ss", "00:00:00", "21:12:17");
+addInput("H:mm:ss", "0:00:00", "21:12:17");
+addInput("hh:mm:ss A", "00:00:00 AM", "11:12:17 PM");
+addInput("h:mm:ss A", "0:00:00 AM", "1:12:17 AM");
+addInput("DD/MM/YYYY", "DD/MM/YYYY", "13/09/1984");
+addInput("DD/MM/YY", "DD/MM/YY", "13/09/84");
+addInput("MM/DD/YYYY", "MM/DD/YYYY", "09/09/1984");
+addInput("MM/DD/YY", "MM/DD/YY", "09/13/84");
 
 
 /***/ })

@@ -20,12 +20,14 @@ export default class MomentInputState extends InputState {
   private tokenHandlers:TokenHandler[];
   private tokenIndex:number;
 
-  constructor(mask:string) {
-    super(mask);
-    this._moment = moment();
+  constructor(mask:string, value:string) {
+    super(mask, value);
+    this._moment = moment(value, mask);
     this.tokenHandlers = [];
     this.tokenIndex = 0;
     this.parseMask();
+    this.refreshValue();
+    console.log(this.tokenIndex);
   }
 
   public get moment(): Moment {
@@ -40,11 +42,7 @@ export default class MomentInputState extends InputState {
   }
 
   public onFocus():boolean {
-    this.tokenIndex = 0;
     this._oldValue = this._value;
-    for (let h of this.tokenHandlers) {
-      h.reset();
-    }
     return true;
   }
 
@@ -58,6 +56,10 @@ export default class MomentInputState extends InputState {
           break;
         } catch (e) {
           handler = this.tokenHandlers[--this.tokenIndex];
+          if (this.tokenIndex < 0) {
+            this.tokenIndex = 0;
+            break;
+          }
         }
       } while (true);
 
@@ -70,12 +72,19 @@ export default class MomentInputState extends InputState {
   }
 
   public onKeyPress(key:string):boolean {
-    let handler:TokenHandler = this.tokenHandlers[this.tokenIndex];
+    let handler:TokenHandler;
 
     if (/[0-9APM\\: ]/i.test(key)) {
-      handler.handleInput(key);
-      while (handler.isCompleted && ++this.tokenIndex < this.tokenHandlers.length) {
+      do {
         handler = this.tokenHandlers[this.tokenIndex];
+        if (!handler.isCompleted) {
+          handler.handleInput(key);
+          break;
+        }
+      } while (handler.isCompleted && ++this.tokenIndex < this.tokenHandlers.length);
+
+      if (this.tokenIndex >= this.tokenHandlers.length) {
+        this.tokenIndex = this.tokenHandlers.length - 1;
       }
     }
 
@@ -98,7 +107,7 @@ export default class MomentInputState extends InputState {
   }
 
   protected parseMask():void {
-    let exp:RegExp = /(YY|YYYY|MM?|DD?|HH?|hh?|mm|ss|A|.)/g;
+    let exp:RegExp = /(YYYY|YY|MM?|DD?|HH?|hh?|mm|ss|A|.)/g;
     let match:RegExpExecArray;
 
     while (true) {
@@ -136,11 +145,15 @@ export default class MomentInputState extends InputState {
           break;
         case "a":
         case "A":
-          this.tokenHandlers.push(new AmPmTokenHandler());
+          this.tokenHandlers.push(new AmPmTokenHandler(match[0], this._moment));
           break;
         default:
           this.tokenHandlers.push(new SeparatorTokenHandler(match[0]));
           break;
+      }
+
+      if (this._moment.isValid()) {
+        this.tokenIndex++;
       }
     }
   }
