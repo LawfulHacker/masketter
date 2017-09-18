@@ -10,6 +10,7 @@ import DayTokenHandler from "../token/DayTokenHandler";
 import HourTokenHandler from "../token/HourTokenHandler";
 import MinuteTokenHandler from "../token/MinuteTokenHandler";
 import SecondTokenHandler from "../token/SecondTokenHandler";
+import AmPmTokenHandler from "../token/AmPmTokenHandler";
 import SeparatorTokenHandler from "../token/SeparatorTokenHandler";
 
 import InputState from "./InputState";
@@ -135,7 +136,7 @@ export default class MomentInputState extends InputState {
           break;
         case "a":
         case "A":
-          this.tokenHandlers.push(new SeparatorTokenHandler(match[0]));
+          this.tokenHandlers.push(new AmPmTokenHandler());
           break;
         default:
           this.tokenHandlers.push(new SeparatorTokenHandler(match[0]));

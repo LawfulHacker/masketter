@@ -19,12 +19,10 @@ export default class Masketter {
 
   constructor(private input:HTMLInputElement, private mask:string) {
     this.input.classList.add("masketter");
-    this.data = "ABCDEFGHIJKL"[Math.floor(Math.random()*10)];
     this.inputState = new MomentInputState(this.mask);
 
     let keyDownEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {
-        console.log(event.type, this.data, event.key, event.code);
         if (this.inputState.onKeyDown(event.key)) {
           input.value = this.inputState.value;
           event.preventDefault();
@@ -34,7 +32,6 @@ export default class Masketter {
 
     let keyPressEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {
-        console.log(event.type, this.data, event.key, event.code);
         if (this.inputState.onKeyPress(event.key)) {
           input.value = this.inputState.value;
           event.preventDefault();
@@ -44,7 +41,6 @@ export default class Masketter {
 
     let keyUpEventListener:EventListenerObject = {
       handleEvent: (event:KeyboardEvent) => {
-        console.log(event.type, this.data, event.key, event.code);
         if (this.inputState.onKeyUp(event.key)) {
           input.value = this.inputState.value;
           event.preventDefault();
@@ -54,7 +50,6 @@ export default class Masketter {
 
     let focusEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
-        console.log(event.type, this.data);
         if (this.inputState.onFocus()) {
           input.value = this.inputState.value;
           event.preventDefault();
@@ -64,21 +59,12 @@ export default class Masketter {
 
     let blurEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
-        console.log(event.type, this.data);
         if (this.inputState.onBlur()) {
           input.value = this.inputState.value;
           event.preventDefault();
         }
       }
     };
-
-    let anyEventListener:EventListenerObject = {
-      handleEvent: (event:Event) => {
-        console.log(event.type, this.data);
-      }
-    };
-
-    utils.on(input, "change", anyEventListener);
 
     utils.on(input, "keydown", keyDownEventListener);
     utils.on(input, "keypress", keyPressEventListener);
