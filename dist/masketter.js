@@ -266,9 +266,11 @@ var Masketter = /** @class */ (function () {
         };
         var blurEventListener = {
             handleEvent: function (event) {
-                if (_this.inputState.onBlur()) {
-                    input.value = _this.inputState.value;
-                    event.preventDefault();
+                if (!_this.calendarOpen) {
+                    if (_this.inputState.onBlur()) {
+                        input.value = _this.inputState.value;
+                        event.preventDefault();
+                    }
                 }
             }
         };
@@ -333,7 +335,6 @@ var MomentInputState = /** @class */ (function (_super) {
         _this.tokenIndex = 0;
         _this.parseMask();
         _this.refreshValue();
-        console.log(_this.tokenIndex);
         return _this;
     }
     Object.defineProperty(MomentInputState.prototype, "moment", {

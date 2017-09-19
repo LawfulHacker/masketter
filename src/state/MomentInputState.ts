@@ -27,7 +27,6 @@ export default class MomentInputState extends InputState {
     this.tokenIndex = 0;
     this.parseMask();
     this.refreshValue();
-    console.log(this.tokenIndex);
   }
 
   public get moment(): Moment {

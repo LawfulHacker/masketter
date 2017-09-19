@@ -16,6 +16,7 @@ export default class Masketter {
   private data:string;
   private value:string;
   private inputState:InputState;
+  public calendarOpen:boolean;
 
   constructor(private input:HTMLInputElement, private mask:string) {
     this.input.classList.add("masketter");
@@ -59,9 +60,11 @@ export default class Masketter {
 
     let blurEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
-        if (this.inputState.onBlur()) {
-          input.value = this.inputState.value;
-          event.preventDefault();
+        if (!this.calendarOpen) {
+          if (this.inputState.onBlur()) {
+            input.value = this.inputState.value;
+            event.preventDefault();
+          }
         }
       }
     };
