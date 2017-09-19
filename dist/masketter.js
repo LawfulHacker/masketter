@@ -90,6 +90,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var moment_1 = __webpack_require__(2);
 var InvalidInputError_1 = __webpack_require__(1);
 var TokenHandler_1 = __webpack_require__(3);
 var MomentTokenHandler = /** @class */ (function (_super) {
@@ -101,6 +102,9 @@ var MomentTokenHandler = /** @class */ (function (_super) {
         if (moment.isValid()) {
             _this.value = _this.moment.format(_this.format);
             _this.isCompleted = true;
+        }
+        else {
+            _this.moment = moment_1.utc(0);
         }
         return _this;
     }

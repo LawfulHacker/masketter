@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { utc }  from "moment";
 
 import InvalidInputError from "../errors/InvalidInputError";
 import TokenHandler from "./TokenHandler";
@@ -9,6 +10,8 @@ export default class MomentTokenHandler extends TokenHandler {
     if (moment.isValid()) {
       this.value = this.moment.format(this.format);
       this.isCompleted = true;
+    } else {
+      this.moment = utc(0);
     }
   }
 
