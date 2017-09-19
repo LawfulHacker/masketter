@@ -4,7 +4,7 @@ export default class InputState {
 
   constructor(protected mask : string, value:string) {
     this._value = value;
-    this._oldValue = "";
+    this._oldValue = value;
   }
 
   public get value(): string {
@@ -13,6 +13,7 @@ export default class InputState {
 
   public set value(value:string) {
     this._value = value;
+    this._oldValue = value;
   }
 
   public onFocus():boolean {

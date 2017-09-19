@@ -266,11 +266,9 @@ var Masketter = /** @class */ (function () {
         };
         var blurEventListener = {
             handleEvent: function (event) {
-                if (!_this.calendarOpen) {
-                    if (_this.inputState.onBlur()) {
-                        input.value = _this.inputState.value;
-                        event.preventDefault();
-                    }
+                if (_this.inputState.onBlur()) {
+                    input.value = _this.inputState.value;
+                    event.preventDefault();
                 }
             }
         };
@@ -280,6 +278,16 @@ var Masketter = /** @class */ (function () {
         utils.on(input, "focus", focusEventListener);
         utils.on(input, "blur", blurEventListener);
     }
+    Object.defineProperty(Masketter.prototype, "value", {
+        get: function () {
+            return this.inputState.value;
+        },
+        set: function (value) {
+            this.inputState.value = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Masketter.prototype, "caretPosition", {
         get: function () {
             if (this.input.selectionStart !== this.input.selectionEnd) {
@@ -842,7 +850,7 @@ var InputState = /** @class */ (function () {
     function InputState(mask, value) {
         this.mask = mask;
         this._value = value;
-        this._oldValue = "";
+        this._oldValue = value;
     }
     Object.defineProperty(InputState.prototype, "value", {
         get: function () {
@@ -850,6 +858,7 @@ var InputState = /** @class */ (function () {
         },
         set: function (value) {
             this._value = value;
+            this._oldValue = value;
         },
         enumerable: true,
         configurable: true

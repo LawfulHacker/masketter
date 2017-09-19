@@ -13,10 +13,7 @@ import InputState from "./state/InputState";
 import MomentInputState from "./state/MomentInputState";
 
 export default class Masketter {
-  private data:string;
-  private value:string;
   private inputState:InputState;
-  public calendarOpen:boolean;
 
   constructor(private input:HTMLInputElement, private mask:string) {
     this.input.classList.add("masketter");
@@ -60,11 +57,9 @@ export default class Masketter {
 
     let blurEventListener:EventListenerObject = {
       handleEvent: (event:FocusEvent) => {
-        if (!this.calendarOpen) {
-          if (this.inputState.onBlur()) {
-            input.value = this.inputState.value;
-            event.preventDefault();
-          }
+        if (this.inputState.onBlur()) {
+          input.value = this.inputState.value;
+          event.preventDefault();
         }
       }
     };
@@ -75,6 +70,13 @@ export default class Masketter {
 
     utils.on(input, "focus", focusEventListener);
     utils.on(input, "blur", blurEventListener);
+  }
+
+  public get value(): string {
+    return this.inputState.value;
+  }
+  public set value(value : string) {
+    this.inputState.value = value;
   }
 
   protected get caretPosition(): number {
